@@ -1,4 +1,6 @@
 (executable
  (public_name json2dune)
  (name main)
- (libraries core json2dune))
+ (libraries core json2dune)
+ (preprocess
+  (pps ppx_jane)))
