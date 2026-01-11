@@ -27,6 +27,7 @@
   ppx_jane
   ppx_expect
   yojson
+  yaml
   )
 )
 

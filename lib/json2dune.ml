@@ -60,3 +60,18 @@ let convert_json_string s =
   let json = Yojson.Basic.from_string s in
   let value = of_yojson json in
   to_dune_string value
+
+let rec yaml_value_to_yojson (yaml_val : Yaml.value) : Yojson.Basic.t =
+  match yaml_val with
+  | `Null -> `Null
+  | `Bool b -> `Bool b
+  | `Float f -> `Float f
+  | `String s -> `String s
+  | `A items -> `List (List.map items ~f:yaml_value_to_yojson)
+  | `O pairs -> `Assoc (List.map pairs ~f:(fun (k, v) -> (k, yaml_value_to_yojson v)))
+
+let convert_yaml_string s =
+  let yaml_val = Yaml.of_string_exn s in
+  let json = yaml_value_to_yojson yaml_val in
+  let value = of_yojson json in
+  to_dune_string value

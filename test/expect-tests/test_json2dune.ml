@@ -32,3 +32,41 @@ let%expect_test "special characters escaped" =
 let%expect_test "null becomes atom" =
   test {|{"key": null}|};
   [%expect {| ((key null)) |}]
+
+let test_yaml yaml_str =
+  let result = Json2dune.convert_yaml_string yaml_str in
+  print_endline result
+
+let%expect_test "yaml basic structure" =
+  test_yaml
+    {|
+library:
+  name: mylib
+  libraries:
+    - base
+    - core
+|};
+  [%expect {| ((library ((name mylib) (libraries (base core))))) |}]
+
+let%expect_test "yaml with numbers and bools" =
+  test_yaml
+    {|
+count: 42
+ratio: 3.14
+enabled: true
+disabled: false
+|};
+  [%expect {| ((count 42) (ratio 3.14) (enabled true) (disabled false)) |}]
+
+let%expect_test "yaml nested objects" =
+  test_yaml
+    {|
+outer:
+  inner: value
+  another: test
+|};
+  [%expect {| ((outer ((inner value) (another test)))) |}]
+
+let%expect_test "yaml with null" =
+  test_yaml {|key: null|};
+  [%expect {| ((key null)) |}]
