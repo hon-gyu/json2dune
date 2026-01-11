@@ -1,20 +1,31 @@
 open! Core
 
+let usage =
+  "Converts JSON or YAML input to dune-flavored S-expressions.\n\n\
+   Examples:\n\
+  \  json2dune config.yaml\n\
+  \  json2dune --format yaml < input.txt\n\
+  \  cat data.json | json2dune"
+;;
+
 let is_yaml_file filename =
   String.is_suffix filename ~suffix:".yaml" || String.is_suffix filename ~suffix:".yml"
 ;;
 
-let run format_opt filename_opt () =
+let run (format_opt : [ `Json | `Yaml ] option) (filename_opt : string option) () : unit =
   let input, format =
     match filename_opt with
     | None ->
-      (* stdin *)
-      let fmt =
-        match format_opt with
-        | Some f -> f
-        | None -> `Json (* default to JSON for stdin *)
-      in
-      In_channel.(input_all stdin), fmt
+      if Core_unix.isatty Core_unix.stdin
+      then (prerr_endline usage; exit 1)
+      else (
+        (* stdin *)
+        let fmt =
+          match format_opt with
+          | Some f -> f
+          | None -> `Json (* default to JSON for stdin *)
+        in
+        In_channel.(input_all stdin), fmt)
     | Some filename ->
       let fmt =
         match format_opt with
@@ -36,12 +47,7 @@ let run format_opt filename_opt () =
 let () =
   Command.basic
     ~summary:"Convert JSON/YAML to dune S-expressions"
-    ~readme:(fun () ->
-      "Converts JSON or YAML input to valid dune-flavored S-expressions.\n\n\
-       Examples:\n\
-      \  json2dune config.yaml\n\
-      \  json2dune --format yaml < input.txt\n\
-      \  cat data.json | json2dune")
+    ~readme:(fun () -> usage)
     (let%map_open.Command format =
        flag
          "--format"
