@@ -24,6 +24,7 @@
  (depends
   (ocaml (>= 5.4.0))
   core
+  core_unix
   ppx_jane
   ppx_expect
   yojson
