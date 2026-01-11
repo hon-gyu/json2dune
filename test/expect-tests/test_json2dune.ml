@@ -13,12 +13,12 @@ let%expect_test "array to list" =
 
 let%expect_test "object to pairs" =
   test {|{"name": "mylib", "public_name": "my-lib"}|};
-  [%expect {| ((name mylib) (public_name my-lib)) |}]
+  [%expect {| (name mylib public_name my-lib) |}]
 ;;
 
 let%expect_test "string with spaces gets quoted" =
   test {|{"message": "hello world"}|};
-  [%expect {| ((message "hello world")) |}]
+  [%expect {| (message "hello world") |}]
 ;;
 
 let%expect_test "numbers and bools" =
@@ -28,17 +28,17 @@ let%expect_test "numbers and bools" =
 
 let%expect_test "nested structure" =
   test {|{"outer": {"inner": "value"}}|};
-  [%expect {| ((outer ((inner value)))) |}]
+  [%expect {| (outer (inner value)) |}]
 ;;
 
 let%expect_test "special characters escaped" =
   test {|{"path": "foo\\bar", "msg": "line1\nline2"}|};
-  [%expect {| ((path "foo\\bar") (msg "line1\nline2")) |}]
+  [%expect {| (path "foo\\bar" msg "line1\nline2") |}]
 ;;
 
 let%expect_test "null becomes atom" =
   test {|{"key": null}|};
-  [%expect {| ((key null)) |}]
+  [%expect {| (key null) |}]
 ;;
 
 let test_yaml yaml_str =
@@ -55,7 +55,7 @@ library:
     - base
     - core
 |};
-  [%expect {| ((library ((name mylib) (libraries (base core))))) |}]
+  [%expect {| (library (name mylib libraries (base core))) |}]
 ;;
 
 let%expect_test "yaml with numbers and bools" =
@@ -66,7 +66,7 @@ ratio: 3.14
 enabled: true
 disabled: false
 |};
-  [%expect {| ((count 42) (ratio 3.14) (enabled true) (disabled false)) |}]
+  [%expect {| (count 42 ratio 3.14 enabled true disabled false) |}]
 ;;
 
 let%expect_test "yaml nested objects" =
@@ -76,10 +76,10 @@ outer:
   inner: value
   another: test
 |};
-  [%expect {| ((outer ((inner value) (another test)))) |}]
+  [%expect {| (outer (inner value another test)) |}]
 ;;
 
 let%expect_test "yaml with null" =
   test_yaml {|key: null|};
-  [%expect {| ((key null)) |}]
+  [%expect {| (key null) |}]
 ;;

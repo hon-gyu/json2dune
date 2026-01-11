@@ -30,7 +30,7 @@ let escape_string s =
   Buffer.contents buf
 ;;
 
-let rec to_dune_string value =
+let rec to_dune_string (value : value) : string =
   match value with
   | String s -> if is_valid_atom s then s else "\"" ^ escape_string s ^ "\""
   | Number f ->
@@ -40,12 +40,12 @@ let rec to_dune_string value =
     let inner = List.map items ~f:to_dune_string |> String.concat ~sep:" " in
     "(" ^ inner ^ ")"
   | Object pairs ->
-    let pair_strs =
-      List.map pairs ~f:(fun (k, v) ->
+    let elements =
+      List.concat_map pairs ~f:(fun (k, v) ->
         let key_str = if is_valid_atom k then k else "\"" ^ escape_string k ^ "\"" in
-        "(" ^ key_str ^ " " ^ to_dune_string v ^ ")")
+        [ key_str; to_dune_string v ])
     in
-    "(" ^ String.concat ~sep:" " pair_strs ^ ")"
+    "(" ^ String.concat ~sep:" " elements ^ ")"
 ;;
 
 let rec of_yojson (json : Yojson.Basic.t) : value =
