@@ -2,6 +2,7 @@ open! Core
 
 let is_yaml_file filename =
   String.is_suffix filename ~suffix:".yaml" || String.is_suffix filename ~suffix:".yml"
+;;
 
 let run format_opt filename_opt () =
   let input, format =
@@ -13,7 +14,7 @@ let run format_opt filename_opt () =
         | Some f -> f
         | None -> `Json (* default to JSON for stdin *)
       in
-      (In_channel.(input_all stdin), fmt)
+      In_channel.(input_all stdin), fmt
     | Some filename ->
       let fmt =
         match format_opt with
@@ -22,7 +23,7 @@ let run format_opt filename_opt () =
           (* auto-detect from extension *)
           if is_yaml_file filename then `Yaml else `Json
       in
-      (In_channel.read_all filename, fmt)
+      In_channel.read_all filename, fmt
   in
   let output =
     match format with
@@ -30,6 +31,7 @@ let run format_opt filename_opt () =
     | `Json -> Json2dune.convert_json_string input
   in
   print_endline output
+;;
 
 let () =
   Command.basic
@@ -43,12 +45,14 @@ let () =
     (let%map_open.Command format =
        flag
          "--format"
-         (optional (Arg_type.create (fun s ->
-              match String.lowercase s with
-              | "json" -> `Json
-              | _ when is_yaml_file s -> `Yaml
-              | _ -> failwith "Format must be 'json' or 'yaml'")))
+         (optional
+            (Arg_type.create (fun s ->
+               match String.lowercase s with
+               | "json" -> `Json
+               | "yaml" | "yml" -> `Yaml
+               | _ -> failwith "Format must be 'json' or 'yaml'")))
          ~doc:"FORMAT Input format: json or yaml (auto-detect by default)"
      and filename = anon (maybe ("FILE" %: string)) in
      run format filename)
   |> Command_unix.run
+;;
