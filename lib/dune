@@ -1,0 +1,4 @@
+(library
+ (name json2dune)
+ (libraries core yojson)
+ (preprocess (pps ppx_jane)))

@@ -1,0 +1,5 @@
+(library
+ (name json2dune_tests)
+ (inline_tests)
+ (libraries json2dune)
+ (preprocess (pps ppx_jane ppx_expect)))
